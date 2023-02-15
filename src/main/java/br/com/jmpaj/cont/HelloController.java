@@ -66,6 +66,7 @@ public class HelloController {
         try {
             Service.criarPastaEArquivoDoWord(HabilitacaoMapper.toDomain(this));
             status.setText("Arquivo criado");
+            Runtime.getRuntime().exec("explorer /select, C:\\Users\\rodri\\Documents\\Projetos\\Java\\cont\\src\\main\\resources\\diretoriosCriados\\");
         } catch (ValidacaoCamposException e) {
             log.warn("Campo inválido: {}", e.getMessage());
             status.setText(e.getMessage());

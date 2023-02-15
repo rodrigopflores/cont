@@ -2,6 +2,7 @@ package br.com.jmpaj.cont.dao;
 
 import br.com.jmpaj.cont.db.DB;
 import br.com.jmpaj.cont.domain.ControleHab;
+import br.com.jmpaj.cont.mapper.ControleHabMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class ControleHabDAOImpl implements ControleHabDAO {
 
-    private Connection conn;
+    private final Connection conn;
 
     public ControleHabDAOImpl(Connection conn) {
         this.conn = conn;
@@ -24,20 +25,24 @@ public class ControleHabDAOImpl implements ControleHabDAO {
         try {
             insertStatement = conn.prepareStatement(
                     "INSERT INTO tbhabs " +
-                            "(Processo, Credor, Situacao, Sentenca) " +
-                            "VALUES " +
-                            "(?, ?, ?, ?)"
+                        "(Processo, Credor, Situacao, Sentenca) " +
+                        "VALUES " +
+                        "(?, ?, ?, ?)"
             );
-            insertStatement.setString(1, hab.getProcesso());
-            insertStatement.setString(2,hab.getCredor());
-            insertStatement.setString(3,hab.getSituacao());
-            insertStatement.setString(4,hab.getSentenca());
+            preencherInsertComDados(hab, insertStatement);
             insertStatement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             DB.closeStatement(insertStatement);
         }
+    }
+
+    private void preencherInsertComDados(ControleHab hab, PreparedStatement insertStatement) throws SQLException {
+        insertStatement.setString(1, hab.getProcesso());
+        insertStatement.setString(2, hab.getCredor());
+        insertStatement.setString(3, hab.getSituacao());
+        insertStatement.setString(4, hab.getSentenca());
     }
 
     @Override
@@ -69,13 +74,7 @@ public class ControleHabDAOImpl implements ControleHabDAO {
             selectStatement.setString(1, "%"+nomeCredor+"%");
             resultSet = selectStatement.executeQuery();
             while(resultSet.next()) {
-                ControleHab hab = ControleHab.builder()
-                        .processo(resultSet.getString("Processo"))
-                        .credor(resultSet.getString("Credor"))
-                        .situacao(resultSet.getString("Situacao"))
-                        .sentenca(resultSet.getString("Sentenca"))
-                        .build();
-                habs.add(hab);
+                habs.add(ControleHabMapper.resultSetToDomain(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
